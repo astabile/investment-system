@@ -51,40 +51,40 @@ def select_assets(regime: MarketRegime, indicators: dict) -> list[tuple[str, str
 
 def allocate_cash(cash_percentage: float, portfolio_value: float = 10000) -> list[tuple[str, float, float]]:
     """
-    Distribuye la porción de efectivo entre cauciones disponibles.
+    Distribute the cash portion among available cauciones.
     
-    Reglas:
-    - Preferir plazos más cortos (mayor liquidez)
-    - Distribución uniforme entre las cauciones seleccionadas
-    - Solo usar las N cauciones más cortas (definido en cash_instruments.py)
+    Rules:
+    - Prefer shorter terms (higher liquidity)
+    - Uniform distribution among selected cauciones
+    - Only use the N shortest cauciones (defined in cash_instruments.py)
     
     Args:
-        cash_percentage: Porcentaje de efectivo (0.0 a 1.0)
-        portfolio_value: Valor total del portfolio en USD (por defecto 10,000 para ejemplo)
+        cash_percentage: Cash percentage (0.0 to 1.0)
+        portfolio_value: Total portfolio value in USD (default 10,000 for example)
     
     Returns:
-        Lista de tuplas (nombre_caucion, monto_usd, yield_anual)
+        List of tuples (caucion_name, amount_usd, annual_yield)
     """
-    # Calcular monto total de efectivo disponible
+    # Calculate total cash amount available
     total_cash = portfolio_value * cash_percentage
     
-    # Si no hay efectivo, retornar vacío
+    # If no cash, return empty
     if total_cash <= 0:
         return []
     
-    # Ordenar cauciones por plazo (ya están ordenadas en el archivo, pero ser explícito)
+    # Sort cauciones by term (already sorted in file, but be explicit)
     cauciones_sorted = sorted(CAUCIONES, key=lambda x: x["days"])
     
-    # Seleccionar solo las N cauciones más cortas (liquidez primero)
+    # Select only the N shortest cauciones (liquidity first)
     selected_cauciones = cauciones_sorted[:MAX_CAUCIONES_TO_USE]
     
-    # Distribución uniforme del efectivo
+    # Uniform distribution of cash
     if not selected_cauciones:
         return []
     
     amount_per_caucion = total_cash / len(selected_cauciones)
     
-    # Crear lista de asignaciones
+    # Create list of allocations
     allocations = []
     for caucion in selected_cauciones:
         allocations.append((
