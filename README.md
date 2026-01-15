@@ -14,12 +14,13 @@ A minimal, rule-based system for conservative portfolio management.
 ### Components
 
 ```
-universe.py      - Asset universe (ETFs + mega caps)
-data.py          - Yahoo Finance data loading
-indicators.py    - EMA, returns, volatility
-market_state.py  - Regime classification
-allocation.py    - Exposure and asset selection
-run.py           - Main entry point
+universe.py         - Asset universe (ETFs + mega caps)
+data.py             - Yahoo Finance data loading
+indicators.py       - EMA, returns, volatility
+market_state.py     - Regime classification
+allocation.py       - Exposure and asset selection
+cash_instruments.py - Caucion definitions for cash allocation
+run.py              - Main entry point
 ```
 
 ### Market Regimes
@@ -60,6 +61,29 @@ The system classifies market conditions into three regimes based on SPY:
 - AAPL (Apple)
 - MSFT (Microsoft)
 - GOOGL (Alphabet)
+
+### Cash Management (Cauciones)
+
+The system automatically allocates the cash portion (non-invested capital) across short-term money market instruments called **cauciones**.
+
+**Key Principles:**
+- Cash never sits idle - it's allocated to cauciones for capital preservation
+- Cauciones are treated as risk-free parking, not investment assets
+- Preference for shorter-term instruments (higher liquidity)
+- Distribution is uniform across the 3 shortest-term cauciones available
+- Yields are informational and must be updated manually
+
+**Available Instruments:**
+Defined in `cash_instruments.py`:
+- Caucion 1-day USD
+- Caucion 2-day USD
+- Caucion 5-day USD
+- Caucion 7-day USD
+
+**Conservative Approach:**
+- RISK_ON: 30% in cauciones
+- NEUTRAL: 60% in cauciones
+- RISK_OFF: 85% in cauciones
 
 ## Installation
 
@@ -135,12 +159,25 @@ MSFT   ↑ $415.80  Mega cap - above EMA200
 GOOGL  ↑ $175.30  Mega cap - above EMA200
        Return (1d/5d/20d): +0.6% / +3.1% / +10.5%
 
+CASH ALLOCATION (CAUCIONES)
+----------------------------------------------------------------------
+Total cash: $3,000 (30% of portfolio)
+Allocated across 3 short-term instruments:
+
+Caucion_1d_USD       → $   1,000  (Yield: 10.00%/year, 1d)
+Caucion_2d_USD       → $   1,000  (Yield: 12.00%/year, 2d)
+Caucion_5d_USD       → $   1,000  (Yield: 15.00%/year, 5d)
+
+Note: Cauciones provide liquidity and capital preservation.
+      Yields are informational. Update rates manually in cash_instruments.py
+
 EXECUTION SUMMARY
 ----------------------------------------------------------------------
 Market regime: RISK_ON
 Total exposure: 70%
 Number of positions: 5
 Weight per position: 14.0%
+Cash in cauciones: 30% (across 3 instruments)
 
 This is an analysis tool, not a trading bot.
 Review the data and execute manually if appropriate.
@@ -162,6 +199,12 @@ Edit `allocation.py` to adjust exposure percentages.
 
 ### Add new indicators
 Add functions to `indicators.py` following the existing pattern.
+
+### Update caucion rates
+Edit `cash_instruments.py` to:
+- Update annual yields (should be done weekly or monthly)
+- Add or remove caucion instruments
+- Adjust `MAX_CAUCIONES_TO_USE` to change diversification
 
 ## Limitations
 

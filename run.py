@@ -8,7 +8,7 @@ from universe import UNIVERSE, MARKET_INDICATOR
 from data import load_prices
 from indicators import calculate_indicators
 from market_state import classify_regime
-from allocation import get_exposure, select_assets
+from allocation import get_exposure, select_assets, allocate_cash
 
 
 def print_separator():
@@ -74,12 +74,36 @@ def main():
             print(f"       Return (1d/5d/20d): {data['return_1d']:+.1%} / {data['return_5d']:+.1%} / {data['return_20d']:+.1%}")
             print()
     
+    # Cash / Cauciones allocation
+    print_section("CASH ALLOCATION (CAUCIONES)")
+    cash_percentage = 1 - exposure
+    
+    if cash_percentage > 0:
+        # Use a default portfolio value of $10,000 for display purposes
+        # User should adjust based on their actual portfolio size
+        portfolio_value = 10000  # USD
+        caucion_allocations = allocate_cash(cash_percentage, portfolio_value)
+        
+        print(f"Total cash: ${portfolio_value * cash_percentage:,.0f} ({cash_percentage:.0%} of portfolio)")
+        print(f"Allocated across {len(caucion_allocations)} short-term instruments:\n")
+        
+        for name, amount, annual_yield in caucion_allocations:
+            days = int(name.split("_")[1].replace("d", ""))
+            print(f"{name:20s} → ${amount:8,.0f}  (Yield: {annual_yield:.2%}/year, {days}d)")
+        
+        print("\nNote: Cauciones provide liquidity and capital preservation.")
+        print("      Yields are informational. Update rates manually in cash_instruments.py")
+    else:
+        print("No cash allocation (100% invested)")
+    
     # Summary
     print_section("EXECUTION SUMMARY")
+    caucion_allocations = allocate_cash(cash_percentage, 10000)
     print(f"Market regime: {regime.value}")
     print(f"Total exposure: {exposure:.0%}")
     print(f"Number of positions: {len(selected_assets)}")
     print(f"Weight per position: {weight_per_asset:.1%}" if selected_assets else "")
+    print(f"Cash in cauciones: {cash_percentage:.0%} (across {len(caucion_allocations)} instruments)")
     print()
     print("This is an analysis tool, not a trading bot.")
     print("Review the data and execute manually if appropriate.")
