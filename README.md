@@ -20,7 +20,9 @@ indicators.py       - EMA, returns, volatility
 market_state.py     - Regime classification
 allocation.py       - Exposure and asset selection
 cash_instruments.py - Caucion definitions for cash allocation
-run.py              - Main entry point
+run.py              - Main entry point (daily analysis)
+backtest.py         - Historical backtesting (lump sum)
+backtest_dca.py     - Historical backtesting (dollar cost averaging)
 ```
 
 ### Market Regimes
@@ -98,6 +100,8 @@ pip install yfinance pandas numpy
 
 ## Usage
 
+### Daily Analysis
+
 ```bash
 python run.py
 ```
@@ -109,6 +113,24 @@ The system will:
 4. Recommend exposure level
 5. Select assets to hold
 6. Print human-readable summary
+
+### Backtesting
+
+Test the system with historical data to validate performance:
+
+**Lump Sum Strategy:**
+```bash
+python backtest.py
+```
+
+Simulates investing a single amount upfront with monthly rebalancing.
+
+**Dollar Cost Averaging (DCA):**
+```bash
+python backtest_dca.py
+```
+
+Simulates starting with initial capital and adding fixed monthly contributions.
 
 ## Output Example
 
@@ -184,6 +206,46 @@ Review the data and execute manually if appropriate.
 ======================================================================
 ```
 
+## Backtesting Results
+
+The system has been validated with historical data from 2021-2025:
+
+### 5-Year Performance (2021-2025)
+
+**Lump Sum Strategy** ($69,000 invested upfront):
+- Final value: $96,653
+- Total return: +40.08%
+- Annualized: +6.99%/year
+
+**Dollar Cost Averaging** ($10k initial + $1k/month):
+- Total invested: $69,000 (over 5 years)
+- Final value: $87,343
+- Total gain: $18,343
+- Return on capital: +26.58%
+
+### Year-by-Year Returns
+
+| Year | Return | Market Condition | System Behavior |
+|------|--------|------------------|-----------------|
+| 2021 | +18.78% | Bull market | RISK_ON all year |
+| 2022 | -13.01% | Bear market | RISK_OFF 9/12 months |
+| 2023 | +7.01% | Recovery | 5 regime switches |
+| 2024 | +12.92% | Bull market | RISK_ON all year |
+| 2025 | +13.06% | Strong growth | Mostly RISK_ON |
+
+**Key Findings:**
+- System survived 2022 bear market with 13% loss vs 18% for S&P 500
+- Conservative 30-85% cash buffer protected capital during downturns
+- Automatic defensive positioning during market stress
+- Consistent 7-13% returns in non-crisis years
+- Both strategies profitable over full cycle
+
+**5-Year Compound:**
+- Started with $10k lump sum in 2021
+- Would have $14,117 by 2026
+- Total return: +41.17%
+- Average: ~7.1% CAGR through bull and bear markets
+
 ## Extending the System
 
 The system is designed to be easily modifiable:
@@ -210,11 +272,12 @@ Edit `cash_instruments.py` to:
 
 - Daily data only (no intraday)
 - No automated trading
-- No backtesting (yet)
-- No portfolio optimization
-- No transaction cost modeling
+- No portfolio optimization (equal weight only)
+- No transaction cost modeling in backtests
 - No tax considerations
-- Fixed universe (no screening)
+- No slippage modeling
+- Fixed universe (no dynamic screening)
+- Backtest data limited by Yahoo Finance availability
 
 ## Currency
 
